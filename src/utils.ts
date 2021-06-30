@@ -18,30 +18,27 @@ export interface NodeInfo extends NodeProps {
 }
 
 // general utils
-export const mapTree = <T>(node: Node, fn: (node: Node) => T): TreeNode<T> => {
-  const getChildren = (node: Node): Node[] => {
-    if (node instanceof Composite) return node.children
-    if (node instanceof Decorator) return node.child ? [node.child] : []
-    return []
-  }
-
-  return {
-    ...fn(node),
-    children: getChildren(node).map((child) => mapTree(child, fn)),
-  }
+const getChildren = (node: Node): Node[] => {
+  if (node instanceof Composite) return node.children
+  if (node instanceof Decorator) return node.child ? [node.child] : []
+  return []
 }
 
+export const mapTree = <T>(fn: (node: Node) => T, node: Node): TreeNode<T> => ({
+  ...fn(node),
+  children: getChildren(node).map((child) => mapTree(fn, child)),
+})
+
 // debug utils
+const pickNodeProps = ({ name, type, status, tickCount }: Node): NodeProps => ({
+  name,
+  type,
+  status,
+  tickCount,
+})
+
 export const snapShot = (root: Node): TreeNode<NodeProps> =>
-  mapTree(
-    root,
-    ({ name, type, status, tickCount }: Node): NodeProps => ({
-      name,
-      type,
-      status,
-      tickCount,
-    })
-  )
+  mapTree(pickNodeProps, root)
 
 export const treeRepr = (root: TreeNode<NodeProps>): string => {
   const nodeRepr = ({ name, type, status }: NodeProps) =>

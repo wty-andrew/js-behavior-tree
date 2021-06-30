@@ -3,5 +3,6 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less)$': 'identity-obj-proxy',
   },
+  testMatch: ['**/__tests__/**/*.test.ts'],
   setupFilesAfterEnv: ['jest-extended'],
 }
