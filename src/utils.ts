@@ -1,10 +1,6 @@
 import { Status, Node, Composite, Decorator } from './core'
 import { nodeSymbol, statusSymbol } from './constants'
 
-export type TreeNode<T extends Record<string, any>> = T & {
-  children: TreeNode<T>[]
-}
-
 export interface NodeProps {
   name: string
   type: string
@@ -16,6 +12,14 @@ export interface NodeInfo extends NodeProps {
   active: boolean
   prevStatus: Status
 }
+
+export type TreeNode<T extends Record<string, any>> = T & {
+  children: TreeNode<T>[]
+}
+
+export type TreeState = TreeNode<NodeProps>
+
+export type TreeInfo = TreeNode<NodeInfo>
 
 // general utils
 const getChildren = (node: Node): Node[] => {
@@ -37,14 +41,13 @@ const pickNodeProps = ({ name, type, status, tickCount }: Node): NodeProps => ({
   tickCount,
 })
 
-export const snapShot = (root: Node): TreeNode<NodeProps> =>
-  mapTree(pickNodeProps, root)
+export const snapShot = (root: Node): TreeState => mapTree(pickNodeProps, root)
 
-export const treeRepr = (root: TreeNode<NodeProps>): string => {
+export const treeRepr = (root: TreeState): string => {
   const nodeRepr = ({ name, type, status }: NodeProps) =>
     `[${nodeSymbol(type)}] ${name} (${statusSymbol(status)})`
 
-  const rec = (node: TreeNode<NodeProps>, padding: string): string[] => [
+  const rec = (node: TreeState, padding: string): string[] => [
     `${padding.slice(0, -4)}${nodeRepr(node)}`,
     ...node.children.flatMap((child, i) =>
       rec(child, padding + (i === node.children.length - 1 ? '    ' : ' │  '))
@@ -54,28 +57,23 @@ export const treeRepr = (root: TreeNode<NodeProps>): string => {
   return rec(root, '    ').join('\n')
 }
 
-export const deriveNodeInfo = (
-  before: TreeNode<NodeProps>,
-  after: TreeNode<NodeProps>
-): TreeNode<NodeInfo> => {
+export const treeInfo = (prev: TreeState, curr: TreeState): TreeInfo => {
   if (
-    before.name !== after.name ||
-    before.type !== after.type ||
-    before.children.length !== after.children.length
+    prev.name !== curr.name ||
+    prev.type !== curr.type ||
+    prev.children.length !== curr.children.length
   )
     throw new Error('Nodes are different')
 
-  const active = after.tickCount > before.tickCount
-
   return {
-    name: before.name,
-    type: before.type,
-    active,
-    prevStatus: before.status,
-    status: active ? after.status : Status.UNKNOWN,
-    tickCount: after.tickCount,
-    children: [...Array(before.children.length)].map((_, i) =>
-      deriveNodeInfo(before.children[i], after.children[i])
+    name: prev.name,
+    type: prev.type,
+    active: curr.tickCount > prev.tickCount,
+    prevStatus: prev.status,
+    status: curr.status,
+    tickCount: curr.tickCount,
+    children: [...Array(prev.children.length)].map((_, i) =>
+      treeInfo(prev.children[i], curr.children[i])
     ),
   }
 }
