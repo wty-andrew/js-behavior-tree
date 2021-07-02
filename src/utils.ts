@@ -77,3 +77,31 @@ export const treeInfo = (prev: TreeState, curr: TreeState): TreeInfo => {
     ),
   }
 }
+
+export class BehaviorTree {
+  root: Node
+  info: TreeInfo
+  prevState: TreeState
+
+  constructor(root: Node) {
+    this.root = root
+
+    const state = snapShot(root)
+    this.info = treeInfo(state, state)
+    this.prevState = state
+  }
+
+  setup(): void {
+    this.root.setup?.()
+  }
+
+  tick(): Status {
+    const status = this.root.tick()
+
+    const currState = snapShot(this.root)
+    this.info = treeInfo(this.prevState, currState)
+    this.prevState = currState
+
+    return status
+  }
+}
