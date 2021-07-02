@@ -3,7 +3,6 @@ export enum Status {
   RUNNING = 'RUNNING',
   SUCCESS = 'SUCCESS',
   FAILURE = 'FAILURE',
-  UNKNOWN = 'UNKNOWN',
 }
 
 export abstract class Node {
@@ -36,7 +35,8 @@ export abstract class Node {
 }
 
 export abstract class Composite extends Node {
-  children: Node[] = []
+  _type = 'Composite'
+  readonly children: Node[] = []
 
   setup(): void {
     if (this.children.length === 0)
@@ -48,11 +48,15 @@ export abstract class Composite extends Node {
   addChild(node: Node): void {
     this.children.push(node)
   }
+
+  addChildren(...nodes: Node[]): void {
+    nodes.forEach((node) => this.addChild(node))
+  }
 }
 
 export abstract class Decorator extends Node {
   _type = 'Decorator'
-  child?: Node
+  private _child?: Node
 
   setup(): void {
     if (!this.child) throw new Error(`Decorator: ${this.name} has no child`)
@@ -64,7 +68,11 @@ export abstract class Decorator extends Node {
     if (this.child)
       throw new Error(`Decorator: ${this.name} has a child already`)
 
-    this.child = node
+    this._child = node
+  }
+
+  get child(): Node | undefined {
+    return this._child
   }
 }
 

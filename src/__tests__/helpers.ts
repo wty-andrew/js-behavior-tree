@@ -30,3 +30,10 @@ export class TestNode extends TestNodeMixin(Node) {}
 export class TestCompositeNode extends TestNodeMixin(Composite) {}
 
 export class TestDecoratorNode extends TestNodeMixin(Decorator) {}
+
+export const makeConstantNodes = (...statuses: Status[]): TestNode[] =>
+  statuses.map((status, i) => {
+    const node = new TestNode(`C${i}`)
+    node.setUpdateReturnValue(status)
+    return node
+  })

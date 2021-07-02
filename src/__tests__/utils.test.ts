@@ -8,16 +8,14 @@ describe('mapTree', () => {
   const n1 = new TestNode('n1')
   const n2 = new TestNode('n2')
   const c1 = new TestCompositeNode('c1')
-  c1.addChild(n1)
-  c1.addChild(n2)
+  c1.addChildren(n1, n2)
 
   const n3 = new TestNode('n3')
   const d1 = new TestDecoratorNode('d1')
   d1.setChild(n3)
 
   const c2 = new TestCompositeNode('c2')
-  c2.addChild(c1)
-  c2.addChild(d1)
+  c2.addChildren(c1, d1)
 
   test('leaf node', () => {
     expect(mapTree(pickName, n1)).toMatchObject({ name: 'n1', children: [] })

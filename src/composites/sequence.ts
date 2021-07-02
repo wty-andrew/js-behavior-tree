@@ -6,7 +6,9 @@ export class Sequence extends Composite {
 
   update(): Status {
     while (this.currentChildIndex < this.children.length) {
-      const status = this.children[this.currentChildIndex].tick()
+      const child = this.children[this.currentChildIndex]
+
+      const status = child.tick()
       switch (status) {
         case Status.RUNNING:
           return Status.RUNNING
@@ -19,7 +21,7 @@ export class Sequence extends Composite {
           return Status.FAILURE
         }
         default:
-          throw new Error(`Invalid return status: ${status} from ${this.name}`)
+          throw new Error(`Invalid return status: ${status} from ${child.name}`)
       }
     }
 

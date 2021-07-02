@@ -1,9 +1,18 @@
-import { Decorator, Status } from '../core'
+import { Node, Decorator, Status } from '../core'
 
 export class ForceFailure extends Decorator {
   update(): Status {
-    if (this.child!.tick() === Status.RUNNING) return Status.RUNNING
+    const child = this.child as Node
+    const status = child.tick()
 
-    return Status.FAILURE
+    switch (status) {
+      case Status.RUNNING:
+        return Status.RUNNING
+      case Status.SUCCESS:
+      case Status.FAILURE:
+        return Status.FAILURE
+      default:
+        throw new Error(`Invalid return status: ${status} from ${child.name}`)
+    }
   }
 }

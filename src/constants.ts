@@ -21,7 +21,5 @@ export const statusSymbol = (status: Status): string => {
       return '✓'
     case Status.FAILURE:
       return '✕'
-    case Status.UNKNOWN:
-      return '⁈'
   }
 }
