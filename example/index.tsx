@@ -1,10 +1,15 @@
 import * as React from 'react'
 import { render } from 'react-dom'
+import { ChakraProvider } from '@chakra-ui/react'
 
-import './assets/styles/main.css'
 import App from './App'
 
-render(<App />, document.getElementById('root'))
+render(
+  <ChakraProvider>
+    <App />
+  </ChakraProvider>,
+  document.getElementById('root')
+)
 
 if (module.hot) {
   module.hot.accept()
